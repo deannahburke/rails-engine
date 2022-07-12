@@ -2,7 +2,9 @@ require 'rails_helper'
 
 describe "Items API" do
   it "sends list of all items" do
-    create_list(:item, 10)
+
+    merchant = create(:merchant)
+    create_list(:item, 10, merchant_id: merchant.id)
 
     get '/api/v1/items'
 
@@ -24,6 +26,9 @@ describe "Items API" do
 
       expect(item).to have_key(:unit_price)
       expect(item[:unit_price]).to be_a(Float)
-    end 
+
+      expect(item).to have_key(:merchant_id)
+      expect(item[:merchant_id]).to be_an(Integer)
+    end
   end
 end
