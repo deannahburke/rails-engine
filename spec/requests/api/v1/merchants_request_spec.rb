@@ -15,7 +15,7 @@ describe "Merchants API" do
 
     merchants[:data].each do |merchant|
       expect(merchant).to have_key(:id)
-      expect(merchant[:id]).to be_an(String)
+      expect(merchant[:id]).to be_a(String)
 
       expect(merchant[:attributes]).to have_key(:name)
       expect(merchant[:attributes][:name]).to be_a(String)
@@ -39,5 +39,30 @@ describe "Merchants API" do
 
     expect(merchant[:data]).to have_key(:attributes)
     expect(merchant[:data][:attributes]).to have_key(:name)
+  end
+
+  it "can get all a merchants items" do
+    merchant = create(:merchant)
+    merchant2 = create(:merchant)
+    items = create_list(:item, 10, merchant_id: merchant.id)
+    items2 = create_list(:item, 7, merchant_id: merchant2.id)
+
+    get "/api/v1/merchants/#{merchant.id}/items"
+
+    results = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(results).to have_key(:data)
+
+    items = results[:data]
+
+    items.each do |item|
+      expect(item).to have_key(:id)
+      expect(item).to have_key(:attributes)
+      expect(item[:attributes][:name]).to be_a(String)
+      expect(item[:attributes][:description]).to be_a(String)
+      expect(item[:attributes][:unit_price]).to be_an(Float)
+      expect(item[:attributes][:merchant_id]).to be_an(Integer)
+    end
   end
 end
