@@ -52,4 +52,41 @@ describe "Items API" do
     expect(item[:data][:attributes]).to have_key(:unit_price)
     expect(item[:data][:attributes]).to have_key(:merchant_id)
   end
+
+  it "can create a new item" do
+    merchant = create(:merchant)
+    item_params = ({
+                    name: "Rubber Duck",
+                    description: "Yellow, plastic, excellent desk company",
+                    unit_price: 4.05,
+                    merchant_id: (merchant.id)
+      })
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+
+    new_item = Item.last
+
+    expect(response).to be_successful
+    expect(new_item.name).to eq(item_params[:name])
+    expect(new_item.name).to eq("Rubber Duck")
+    expect(new_item.description).to eq("Yellow, plastic, excellent desk company")
+    expect(new_item.unit_price).to eq(4.05)
+    expect(new_item.merchant_id).to eq(merchant.id)
+  end
+
+  it "will not create item without all params" do
+    merchant = create(:merchant)
+    item_params = ({
+                    name: nil,
+                    description: "Yellow, plastic, excellent desk company",
+                    unit_price: 4.05,
+                    merchant_id: nil
+                  })
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+
+    expect(response).to have_http_status(404)
+  end
 end
