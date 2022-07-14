@@ -118,4 +118,17 @@ describe "Items API" do
     item = Item.find_by(id: item_id)
     expect(response).to have_http_status(404)
   end
+
+  it "can destroy an item" do
+    merchant = create(:merchant)
+    item = create(:item, merchant_id: merchant.id)
+
+    expect(Item.count).to eq(1)
+
+    delete "/api/v1/items/#{item.id}"
+
+    expect(response).to be_successful
+    expect(Item.count).to eq(0)
+    expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+  end 
 end
