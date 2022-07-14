@@ -89,4 +89,33 @@ describe "Items API" do
 
     expect(response).to have_http_status(404)
   end
+
+  it "can update existing item record" do
+    merchant_id = create(:merchant).id
+    item_id = create(:item, merchant_id: merchant_id).id
+    previous_price = Item.last.unit_price
+    updated_params = { unit_price: 5.99 }
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    patch "/api/v1/items/#{item_id}", headers: headers, params: JSON.generate({item: updated_params})
+
+    item = Item.find_by(id: item_id)
+
+    expect(response).to be_successful
+    expect(item.unit_price).to_not eq(previous_price)
+    expect(item.unit_price).to eq(5.99)
+  end
+
+  it "will not update item without all params" do
+    merchant_id = create(:merchant).id
+    item_id = create(:item, merchant_id: merchant_id).id
+    previous_price = Item.last.unit_price
+    updated_params = { unit_price: nil }
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    patch "/api/v1/items/#{item_id}", headers: headers, params: JSON.generate({item: updated_params})
+
+    item = Item.find_by(id: item_id)
+    expect(response).to have_http_status(404)
+  end
 end
