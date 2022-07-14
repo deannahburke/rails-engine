@@ -73,4 +73,16 @@ describe "Merchants API" do
 
   xit "will return 404 if merchant id is invalid" do
   end
+
+  it "can return a single merchant which matches a search term" do
+    merchant = create(:merchant, name: "Turing")
+    merchant2 = create(:merchant, name: "Ring World")
+    merchant3 = create(:merchant, name: "Tuna Stop")
+
+    get "/api/v1/merchants/find"
+
+    search_result = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+  end 
 end
