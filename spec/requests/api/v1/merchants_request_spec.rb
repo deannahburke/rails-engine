@@ -84,6 +84,7 @@ describe "Merchants API" do
     merchant3 = create(:merchant, name: "Tuna Stop")
 
     search = "Ring"
+    
     get "/api/v1/merchants/find?name=#{search}"
 
     search_result = JSON.parse(response.body, symbolize_names: true)

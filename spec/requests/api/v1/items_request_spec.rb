@@ -147,4 +147,52 @@ describe "Items API" do
     expect(result[:data]).to have_key(:type)
     expect(result[:data][:type]).to eq("merchant")
   end
+
+  it "can return all items that match a search term" do
+    merchant = create(:merchant)
+    merchant2 = create(:merchant)
+    item = create(:item, name: "necklace", merchant_id: merchant.id)
+    item2 = create(:item, name: "brace", merchant_id: merchant.id)
+    item3 = create(:item, name: "Neck Brace", merchant_id: merchant2.id)
+    item4 = create(:item, name: "xylophone", merchant_id: merchant2.id)
+
+    search = "Ace"
+
+    get "/api/v1/items/find_all?name=#{search}"
+
+    search_result = JSON.parse(response.body, symbolize_names: true)
+    expect(response).to be_successful
+    expect(search_result).to have_key(:data)
+    expect(search_result[:data]).to be_an(Array)
+  end
+
+  it "will return an empty object if no match is found" do
+    merchant = create(:merchant)
+    merchant2 = create(:merchant)
+    item = create(:item, name: "necklace", merchant_id: merchant.id)
+    item2 = create(:item, name: "brace", merchant_id: merchant.id)
+    item3 = create(:item, name: "Neck Brace", merchant_id: merchant2.id)
+    item4 = create(:item, name: "xylophone", merchant_id: merchant2.id)
+
+    search = "peanut"
+
+    get "/api/v1/items/find_all?name=#{search}"
+
+    search_result = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(200)
+  end
+
+  it "returns 400 if no search params specified" do
+    merchant = create(:merchant)
+    merchant2 = create(:merchant)
+    item = create(:item, name: "necklace", merchant_id: merchant.id)
+    item2 = create(:item, name: "brace", merchant_id: merchant.id)
+    item3 = create(:item, name: "Neck Brace", merchant_id: merchant2.id)
+    item4 = create(:item, name: "xylophone", merchant_id: merchant2.id)
+
+    get "/api/v1/items/find_all?name="
+
+    expect(response).to have_http_status(400)
+  end 
 end
