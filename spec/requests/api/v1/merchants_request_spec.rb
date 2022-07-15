@@ -72,5 +72,49 @@ describe "Merchants API" do
   end
 
   xit "will return 404 if merchant id is invalid" do
+    get "/api/v1/merchants/999999999/items"
+
+    expect(response).to have_http_status(404)
+    expect{Merchant.find(merchant.id)}.to raise_error(ActiveRecord::RecordNotFound)
+  end
+
+  it "can return a single merchant which matches a search term" do
+    merchant = create(:merchant, name: "Turing")
+    merchant2 = create(:merchant, name: "Ring World")
+    merchant3 = create(:merchant, name: "Tuna Stop")
+
+    search = "Ring"
+    
+    get "/api/v1/merchants/find?name=#{search}"
+
+    search_result = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(search_result).to have_key(:data)
+    expect(search_result[:data][:attributes][:name]).to eq("Ring World")
+  end
+
+  it "will return an empty object if no match is found" do
+    merchant = create(:merchant, name: "Turing")
+    merchant2 = create(:merchant, name: "Ring World")
+    merchant3 = create(:merchant, name: "Tuna Stop")
+
+    search = "xylophone"
+
+    get "/api/v1/merchants/find?name=#{search}"
+
+    search_result = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(200)
+  end
+
+  it "will return 400 if no search params specified" do
+    merchant = create(:merchant, name: "Turing")
+    merchant2 = create(:merchant, name: "Ring World")
+    merchant3 = create(:merchant, name: "Tuna Stop")
+
+    get "/api/v1/merchants/find?name="
+
+    expect(response).to have_http_status(400)
   end
 end
