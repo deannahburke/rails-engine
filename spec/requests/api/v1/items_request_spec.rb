@@ -132,6 +132,19 @@ describe "Items API" do
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
   end
 
+  it "destroys invoice if item is destroyed" do
+    merchant = create(:merchant)
+    item = create(:item, merchant_id: merchant.id)
+    invoice = Invoice.create(status: "In progress", merchant_id: merchant.id)
+    invoice_item = InvoiceItem.create(quantity: 2, unit_price: 5.99, invoice_id: invoice.id, item_id: item.id)
+
+    expect(Invoice.all).to eq([invoice])
+
+    item.destroy
+
+    expect(Invoice.all).to eq([])
+  end
+  
   it "sends merchant associated with the item" do
     merchant = create(:merchant)
     item = create(:item, merchant_id: merchant.id)
@@ -194,5 +207,5 @@ describe "Items API" do
     get "/api/v1/items/find_all?name="
 
     expect(response).to have_http_status(400)
-  end 
+  end
 end
